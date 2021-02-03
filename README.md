@@ -1,9 +1,9 @@
-# CO620_Python
+# CO620 Emotion Detection Python
  Python files, for emotion detection using ECG, GSR and Eye Tracking, Results are as classification reports and graphs for each model.
  
  ## Introduction
  
- There are working examples of the emotion detection working with the processed data as well as my own feature extraction. Deep learning at the end of the notebook however the data isnt enough to train a network like this, and the more simple models score highly anyway. Results below are for ECG and GSR combined, ECG, GSR and eye tracking combined as well as a 10 point average for the ECG and GSR signals. 
+There are working examples of the emotion detection working with the processed data as well as my own feature extraction. Deep learning at the end of the notebook however the data isnt enough to train a network like this, and the more simple models score highly anyway. Results below are for ECG and GSR combined, ECG, GSR and eye tracking combined as well as a 10 point average for the ECG and GSR signals. The 2 python files are for extracting 10 point average features as well as the calculated performance metrics for each algorithm. 
 
 ## Results
 ### Non standardised ECG-GSR:

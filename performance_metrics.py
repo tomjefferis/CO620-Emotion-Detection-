@@ -19,7 +19,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-#import performance_metrics
+
+# import performance_metrics
 
 
 def run_exps(final, title) -> pd.DataFrame:
@@ -65,7 +66,7 @@ def run_exps(final, title) -> pd.DataFrame:
     return final
 
 
-def scriptRunner(data, title) -> pd.DataFrame:
+def scriptRunner(data, title, classifiers) -> pd.DataFrame:
     X = data.drop('labels', axis=1)
     y = data['labels']
     scoring = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
@@ -87,18 +88,6 @@ def scriptRunner(data, title) -> pd.DataFrame:
     axs[10].scatter(df_subset['tsne-2d-one'], df_subset['tsne-2d-two'], c=y_train,
                     cmap=matplotlib.colors.ListedColormap(colors))
     axs[10].set_title("TSNE Data")
-
-    # Modeling step Test differents algorithms
-    classifiers = [("AdaBoost", AdaBoostClassifier()),
-                   ("RFC", RandomForestClassifier()),
-                   ("KNN", KNeighborsClassifier(3)),
-                   #("LSVC", SVC(kernel="linear", C=0.025)),
-                   ("SVC", SVC()),
-                   ("GPC", GaussianProcessClassifier(1.0 * RBF(1.0))),
-                   ("DTC", DecisionTreeClassifier(max_depth=5)),
-                   ("MLP", MLPClassifier(alpha=1, max_iter=1000)),
-                   ("NB", GaussianNB()),
-                   ("QDA", QuadraticDiscriminantAnalysis())]
 
     results = []
     names = []
@@ -155,42 +144,42 @@ def scriptRunner(data, title) -> pd.DataFrame:
     fig.savefig(f'./results/{title}/visual_classifier_decisions.png', dpi=200)
     fig.show()
 
-
-    run_exps(final,title)
+    run_exps(final, title)
     report.to_csv(f"./results/{title}/report.csv")
     return crm
 
-def confusionMatrixPlot(confusionMatrix,title):
-    fig, axes = plt.subplots(3,3, figsize=(20, 20))
+
+def confusionMatrixPlot(confusionMatrix, title, size):
+    fig, axes = plt.subplots(3, 3, figsize=(20, 20))
     for key, ax in zip(confusionMatrix, axes.flatten()):
-        df_cm = pd.DataFrame(confusionMatrix[key], range(2), range(2))
+        df_cm = pd.DataFrame(confusionMatrix[key], range(size), range(size))
         # plt.figure(figsize=(10,7))
         sns.set(font_scale=1.4)  # for label size
-        sns.heatmap(df_cm, annot=True, annot_kws={"size": 16}, ax=ax,cmap="crest")
-        ax.set_title(key)# font size
+        sns.heatmap(df_cm, annot=True, annot_kws={"size": 16}, ax=ax, cmap="crest")
+        ax.set_title(key)  # font size
 
     plt.savefig(f'./results/{title}/confusionmatrix.png', dpi=200)
     plt.show()
 
 
-def main(results):
-
+# Modeling step Test differents algorithms
+def main(results, classifiers = None):
+    if classifiers is None:
+        classifiers = [("AdaBoost", AdaBoostClassifier()),
+                       ("RFC", RandomForestClassifier()),
+                       ("KNN", KNeighborsClassifier()),
+                       # ("LSVC", SVC(kernel="linear", C=0.025)),
+                       ("SVC", SVC()),
+                       ("GPC", GaussianProcessClassifier()),
+                       ("DTC", DecisionTreeClassifier()),
+                       ("MLP", MLPClassifier()),
+                       ("NB", GaussianNB()),
+                       ("QDA", QuadraticDiscriminantAnalysis())]
     for key in results:
         data = pd.read_csv(results[key])
-        data.dropna(axis=0,inplace=True)
+        data.dropna(axis=0, inplace=True)
 
-        #y = data["labels"].values
-        #x = data.drop("labels",axis=1)
+        labels = data["labels"].nunique()
 
-        #min_max_scaler = preprocessing.StandardScaler()
-
-        #x_scaled = min_max_scaler.fit_transform(x)
-
-        #x = pd.DataFrame(x_scaled)
-        #y = pd.DataFrame(y,columns=["labels"])
-        #data = pd.concat([y,x],axis=1)
-
-        cm = scriptRunner(data,key)
-        confusionMatrixPlot(cm,key)
-
-
+        cm = scriptRunner(data, key, classifiers)
+        confusionMatrixPlot(cm, key, labels)

@@ -74,21 +74,6 @@ def scriptRunner(data, title, classifiers) -> pd.DataFrame:
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=1)
 
-    tsne_results = TSNE(n_components=2).fit_transform(X_train)
-    df_subset = pd.DataFrame()
-
-    df_subset['tsne-2d-one'] = tsne_results[:, 0]
-    df_subset['tsne-2d-two'] = tsne_results[:, 1]
-    df_subset['tsne-2d-lab'] = y_train
-
-    plt.rcParams["figure.figsize"] = [16, 9]
-    fig, axs = plt.subplots(11, figsize=(15, 20))
-
-    colors = ['red', 'green', 'blue', 'yellow']
-    axs[10].scatter(df_subset['tsne-2d-one'], df_subset['tsne-2d-two'], c=y_train,
-                    cmap=matplotlib.colors.ListedColormap(colors))
-    axs[10].set_title("TSNE Data")
-
     results = []
     names = []
     dfs = []
@@ -97,11 +82,9 @@ def scriptRunner(data, title, classifiers) -> pd.DataFrame:
     for index, data in enumerate(classifiers):
         name = data[0]
         model = data[1]
-        kfold = model_selection.KFold(n_splits=5, shuffle=True, random_state=90210)
+        kfold = model_selection.StratifiedKFold(n_splits=10, shuffle=True, random_state=90210)
         cv_results = model_selection.cross_validate(model, X_train, y_train, cv=kfold, scoring=scoring)
         clf = model.fit(X_train, y_train)
-        y_pred = clf.predict(X_test)
-        y_mod = clf.predict(X_train)
         y_validation = clf.predict(X_val)
         cr = classification_report(y_val, y_validation, output_dict=True)
         crm[name] = confusion_matrix(y_val, y_validation, normalize="true")
@@ -115,34 +98,6 @@ def scriptRunner(data, title, classifiers) -> pd.DataFrame:
         final = pd.concat(dfs, ignore_index=True)
         # results.append([name,cr])
         # create meshgrid
-        resolution = 200  # 100x100 background pixels
-        X2d_xmin, X2d_xmax = np.min(tsne_results[:, 0]), np.max(tsne_results[:, 0])
-        X2d_ymin, X2d_ymax = np.min(tsne_results[:, 1]), np.max(tsne_results[:, 1])
-        xx, yy = np.meshgrid(np.linspace(X2d_xmin, X2d_xmax, resolution), np.linspace(X2d_ymin, X2d_ymax, resolution))
-
-        # approximate Voronoi tesselation on resolution x resolution grid using 1-NN
-        background_model = KNeighborsClassifier(n_neighbors=1).fit(tsne_results, y_mod)
-        voronoiBackground = background_model.predict(np.c_[xx.ravel(), yy.ravel()])
-        voronoiBackground = voronoiBackground.reshape((resolution, resolution))
-
-        # plot
-        axs[index].contourf(xx, yy, voronoiBackground, cmap=matplotlib.colors.ListedColormap(colors), alpha=0.8)
-        axs[index].scatter(tsne_results[:, 0], tsne_results[:, 1], c=y_train,
-                           cmap=matplotlib.colors.ListedColormap(colors), alpha=0.4)
-        axs[index].set_title(name)
-
-    # print(x)
-
-    fig = plt.gcf()
-    gs = gridspec.GridSpec(4, 3)
-    for i in range(3):
-        for j in range(4):
-            k = i + j * 3
-            if k < len(axs):
-                axs[k].set_position(gs[k].get_position(fig))
-
-    fig.savefig(f'./results/{title}/visual_classifier_decisions.png', dpi=200)
-    fig.show()
 
     run_exps(final, title)
     report.to_csv(f"./results/{title}/report.csv")

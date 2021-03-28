@@ -20,7 +20,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 
-# import performance_metrics
+#this file provides classification reports and confusion matrix for inputs
 
 
 def run_exps(final, title) -> pd.DataFrame:

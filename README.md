@@ -1,5 +1,5 @@
 # CO620 Emotion Detection Python
- Python files, for emotion detection using ECG, GSR and Eye Tracking, Results are as classification reports and graphs for each model.
+ Python files, for emotion detection using ECG, GSR and Eye Tracking, Results are as classification reports and graphs for each model. To view on Github: [Here](https://github.com/tomjefferis/CO620-Emotion-Detection-/)
  
  ## Introduction
  

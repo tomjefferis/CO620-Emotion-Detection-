@@ -1,0 +1,441 @@
+#%% md
+
+#UPDATE: 27/07/21 -> The code isnt commented and its been 5 months since using/writing this... Im pretty sure its plug and play with the dataset, 4 class as well as the valence and arousal metrics as binary measures, the models are based on a similar model used with the DEAP dataset (https://www.aaai.org/ocs/index.php/IAAI/IAAI17/paper/viewFile/15007/13731)
+# It is also copied from the notebook as it wasnt sending properly so some not formatted properly etc
+#Tensorflow Implementation
+#This is starting with binary classification with valence
+
+#%%
+
+import tensorflow as tf
+import pandas as pd
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import train_test_split
+
+dataset = pd.read_csv("./processed_data/completeDatabinary.csv")
+dataset.dropna()
+
+X = dataset.drop('labels', axis=1)
+y = dataset['labels']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.InputLayer(input_shape=len(X.columns)),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(8, activation='relu'),
+        tf.keras.layers.Dense(2, activation='relu')
+    ])
+
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.002),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.fit(X_train,y_train,epochs=25)
+
+yhat_probs = model.predict(X_test, verbose=0)
+# predict crisp classes for test set
+yhat_classes = model.predict_classes(X_test, verbose=0)
+
+
+# accuracy: (tp + tn) / (p + n)
+accuracy = accuracy_score(y_test, yhat_classes)
+print('Accuracy: %f' % accuracy)
+# precision tp / (tp + fp)
+precision = precision_score(y_test, yhat_classes, average='weighted')
+print('Precision: %f' % precision)
+# recall: tp / (tp + fn)
+recall = recall_score(y_test, yhat_classes, average='weighted')
+print('Recall: %f' % recall)
+# f1: 2 tp / (2 tp + fp + fn)
+f1 = f1_score(y_test, yhat_classes, average='weighted')
+print('F1 score: %f' % f1)
+
+
+#%% md
+
+Deep learning with Other binary
+
+#%%
+
+dataset = pd.read_csv("./processed_data/completeDatabinaryarous.csv")
+dataset.dropna()
+
+X = dataset.drop('labels', axis=1)
+y = dataset['labels']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.InputLayer(input_shape=len(X.columns)),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(8, activation='relu'),
+        tf.keras.layers.Dense(2, activation='relu')
+    ])
+
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.002),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.fit(X_train,y_train,epochs=25)
+
+yhat_probs = model.predict(X_test, verbose=0)
+# predict crisp classes for test set
+yhat_classes = model.predict_classes(X_test, verbose=0)
+
+
+# accuracy: (tp + tn) / (p + n)
+accuracy = accuracy_score(y_test, yhat_classes)
+print('Accuracy: %f' % accuracy)
+# precision tp / (tp + fp)
+precision = precision_score(y_test, yhat_classes, average='weighted')
+print('Precision: %f' % precision)
+# recall: tp / (tp + fn)
+recall = recall_score(y_test, yhat_classes, average='weighted')
+print('Recall: %f' % recall)
+# f1: 2 tp / (2 tp + fp + fn)
+f1 = f1_score(y_test, yhat_classes, average='weighted')
+print('F1 score: %f' % f1)
+
+
+#%% md
+
+Code for NN with complete dataset
+
+#%%
+
+dataset = pd.read_csv("./processed_data/completeData.csv")
+
+X = dataset.drop('labels', axis=1)
+y = dataset['labels']
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=1)
+
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.InputLayer(input_shape=len(X.columns)),
+        tf.keras.layers.Dense(128,activation='relu'),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(4, activation='softmax')
+    ])
+
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.002),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.fit(X_train,y_train,epochs=25)
+
+yhat_probs = model.predict(X_test, verbose=0)
+# predict crisp classes for test set
+yhat_classes = model.predict_classes(X_test, verbose=0)
+
+
+# accuracy: (tp + tn) / (p + n)
+accuracy = accuracy_score(y_test, yhat_classes)
+print('Accuracy: %f' % accuracy)
+# precision tp / (tp + fp)
+precision = precision_score(y_test, yhat_classes, average='weighted')
+print('Precision: %f' % precision)
+# recall: tp / (tp + fn)
+recall = recall_score(y_test, yhat_classes, average='weighted')
+print('Recall: %f' % recall)
+# f1: 2 tp / (2 tp + fp + fn)
+f1 = f1_score(y_test, yhat_classes, average='weighted')
+print('F1 score: %f' % f1)
+
+
+
+
+
+
+#%% md
+
+code for nn without eye tracking
+
+#%%
+
+dataset = pd.read_csv("./processed_data/completeDatanoeye.csv")
+
+X = dataset.drop('labels', axis=1)
+y = dataset['labels']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+
+model = tf.keras.Sequential(
+    [
+        tf.keras.layers.InputLayer(input_shape=len(X.columns)),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(4, activation='softmax')
+    ])
+
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.002),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.fit(X_train,y_train,epochs=25)
+
+yhat_probs = model.predict(X_test, verbose=0)
+# predict crisp classes for test set
+yhat_classes = model.predict_classes(X_test, verbose=0)
+
+
+# accuracy: (tp + tn) / (p + n)
+accuracy = accuracy_score(y_test, yhat_classes)
+print('Accuracy: %f' % accuracy)
+# precision tp / (tp + fp)
+precision = precision_score(y_test, yhat_classes, average='weighted')
+print('Precision: %f' % precision)
+# recall: tp / (tp + fn)
+recall = recall_score(y_test, yhat_classes, average='weighted')
+print('Recall: %f' % recall)
+# f1: 2 tp / (2 tp + fp + fn)
+f1 = f1_score(y_test, yhat_classes, average='weighted')
+print('F1 score: %f' % f1)
+
+
+#%% md
+
+CNN with binary classes
+
+#%%
+
+from tensorflow.keras import datasets, layers, models
+dataset = pd.read_csv("./processed_data/completeDatabinaryarous.csv")
+
+X = dataset.drop('labels', axis=1)
+y = dataset['labels'].values
+y = y.reshape((312,1))
+print(y.shape)
+X2d = []
+y2d = []
+
+
+for value in X.values:
+    addzero = 121 - len(value)
+    zero = np.zeros(addzero)
+    x = np.concatenate([value,zero])
+    X2d.append(x.reshape((11,11,1)))
+
+for value in y:
+    y2d.append(np.array(value))
+
+
+X2d = np.array(X2d)
+y2d = np.array(y2d)
+
+#%%
+
+import tensorflow as tf
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
+X_train, X_test, y_train, y_test = train_test_split(X2d, y2d, test_size=0.2, random_state=1)
+
+model = models.Sequential()
+model.add(layers.Conv2D(128, (2,2), activation='tanh', input_shape=(11, 11,1)))
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Dropout(0.2))
+model.add(layers.Flatten())
+model.add(layers.Dense(32, activation='relu'))
+model.add(layers.Dense(16, activation='relu'))
+model.add(layers.Dense(2,activation='softmax'))
+
+model.compile(optimizer=tf.keras.optimizers.Adam(),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.fit(X_train,y_train,epochs=25)
+
+yhat_probs = model.predict(X_test, verbose=0)
+# predict crisp classes for test set
+yhat_classes = model.predict_classes(X_test, verbose=0)
+
+
+# accuracy: (tp + tn) / (p + n)
+accuracy = accuracy_score(y_test, yhat_classes)
+print('Accuracy: %f' % accuracy)
+# precision tp / (tp + fp)
+precision = precision_score(y_test, yhat_classes, average='weighted')
+print('Precision: %f' % precision)
+# recall: tp / (tp + fn)
+recall = recall_score(y_test, yhat_classes, average='weighted')
+print('Recall: %f' % recall)
+# f1: 2 tp / (2 tp + fp + fn)
+f1 = f1_score(y_test, yhat_classes, average='weighted')
+print('F1 score: %f' % f1)
+
+
+#%%
+
+from tensorflow.keras import datasets, layers, models
+dataset = pd.read_csv("./processed_data/completeDatabinary.csv")
+
+X = dataset.drop('labels', axis=1)
+y = dataset['labels'].values
+y = y.reshape((312,1))
+print(y.shape)
+X2d = []
+y2d = []
+
+
+for value in X.values:
+    addzero = 121 - len(value)
+    zero = np.zeros(addzero)
+    x = np.concatenate([value,zero])
+    X2d.append(x.reshape((11,11,1)))
+
+for value in y:
+    y2d.append(np.array(value))
+
+
+X2d = np.array(X2d)
+y2d = np.array(y2d)
+
+#%%
+
+import tensorflow as tf
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
+X_train, X_test, y_train, y_test = train_test_split(X2d, y2d, test_size=0.2, random_state=1)
+
+model = models.Sequential()
+model.add(layers.Conv2D(128, (2,2), activation='tanh', input_shape=(11, 11,1)))
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Dropout(0.2))
+model.add(layers.Flatten())
+model.add(layers.Dense(32, activation='relu'))
+model.add(layers.Dense(16, activation='relu'))
+model.add(layers.Dense(2,activation='softmax'))
+
+model.compile(optimizer=tf.keras.optimizers.Adam(),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.fit(X_train,y_train,epochs=25)
+
+yhat_probs = model.predict(X_test, verbose=0)
+# predict crisp classes for test set
+yhat_classes = model.predict_classes(X_test, verbose=0)
+
+
+# accuracy: (tp + tn) / (p + n)
+accuracy = accuracy_score(y_test, yhat_classes)
+print('Accuracy: %f' % accuracy)
+# precision tp / (tp + fp)
+precision = precision_score(y_test, yhat_classes, average='weighted')
+print('Precision: %f' % precision)
+# recall: tp / (tp + fn)
+recall = recall_score(y_test, yhat_classes, average='weighted')
+print('Recall: %f' % recall)
+# f1: 2 tp / (2 tp + fp + fn)
+f1 = f1_score(y_test, yhat_classes, average='weighted')
+print('F1 score: %f' % f1)
+
+
+#%%
+
+from tensorflow.keras import datasets, layers, models
+dataset = pd.read_csv("./processed_data/completeData.csv")
+
+X = dataset.drop('labels', axis=1)
+y = dataset['labels'].values
+y = y.reshape((312,1))
+print(y.shape)
+X2d = []
+y2d = []
+
+
+for value in X.values:
+    addzero = 121 - len(value)
+    zero = np.zeros(addzero)
+    x = np.concatenate([value,zero])
+    X2d.append(x.reshape((11,11,1)))
+
+for value in y:
+    y2d.append(np.array(value))
+
+
+X2d = np.array(X2d)
+y2d = np.array(y2d)
+
+#%%
+
+import tensorflow as tf
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
+X_train, X_test, y_train, y_test = train_test_split(X2d, y2d, test_size=0.2, random_state=1)
+
+model = models.Sequential()
+model.add(layers.Conv2D(128, (3,3), activation='tanh', input_shape=(11, 11,1)))
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Dropout(0.2))
+model.add(layers.Flatten())
+model.add(layers.Dense(32, activation='relu'))
+model.add(layers.Dense(16, activation='relu'))
+model.add(layers.Dense(4,activation='softmax'))
+
+
+
+model.compile(optimizer=tf.keras.optimizers.Adam(),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+model.fit(X_train,y_train,epochs=25)
+
+yhat_probs = model.predict(X_test, verbose=0)
+# predict crisp classes for test set
+yhat_classes = model.predict_classes(X_test, verbose=0)
+
+
+# accuracy: (tp + tn) / (p + n)
+accuracy = accuracy_score(y_test, yhat_classes)
+print('Accuracy: %f' % accuracy)
+# precision tp / (tp + fp)
+precision = precision_score(y_test, yhat_classes, average='weighted')
+print('Precision: %f' % precision)
+# recall: tp / (tp + fn)
+recall = recall_score(y_test, yhat_classes, average='weighted')
+print('Recall: %f' % recall)
+# f1: 2 tp / (2 tp + fp + fn)
+f1 = f1_score(y_test, yhat_classes, average='weighted')
+print('F1 score: %f' % f1)
+
+
+#%%
+
+dataset = pd.read_csv("./processed_data/completeData.csv")
+
+X = dataset.drop('labels', axis=1)
+y = dataset['labels'].values
+y = y.reshape((312,1))
+print(y.shape)
+X2d = []
+y2d = []
+
+
+for value in X.values:
+    addzero = 121 - len(value)
+    zero = np.zeros(addzero)
+    x = np.concatenate([value,zero])
+    X2d.append(x.reshape((11,11,1)))
+
+for value in y:
+    y2d.append(np.array(value))
+
+
+X2d = np.array(X2d)
+y2d = np.array(y2d)
